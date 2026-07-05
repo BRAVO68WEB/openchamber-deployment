@@ -1,0 +1,14 @@
+# Environment secrets
+.env
+
+# Docker named volumes (created at runtime)
+# If you mount bind volumes instead, add those dirs here
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+*.swp
+*.swo
+*~

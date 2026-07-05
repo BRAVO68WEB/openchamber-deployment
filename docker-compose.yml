@@ -1,0 +1,98 @@
+services:
+  # ─────────────────────────────────────────────
+  # OpenCode - Headless AI coding agent API
+  # ─────────────────────────────────────────────
+  opencode:
+    image: ghcr.io/anomalyco/opencode:latest
+    container_name: opencode
+    restart: unless-stopped
+    stdin_open: true
+    tty: true
+    volumes:
+      - user-workspaces:/workspaces
+      - opencode-config:/root/.config/opencode
+      - opencode-data:/root/.local/share/opencode
+      - opencode-cache:/root/.cache/opencode
+      - ./config/opencode.json:/root/.config/opencode/opencode.json:ro
+    working_dir: /workspaces
+    environment:
+      # ── Provider API Keys ──
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      # ── OpenCode Server ──
+      - OPENCODE_SERVER_PASSWORD=${OPENCODE_SERVER_PASSWORD}
+      - OPENCODE_SERVER_USERNAME=${OPENCODE_SERVER_USERNAME:-opencode}
+      # ── Behavior ──
+      - OPENCODE_DISABLE_AUTOUPDATE=true
+      - OPENCODE_DISABLE_MODELS_FETCH=true
+    command: ["serve", "--port", "4096", "--hostname", "0.0.0.0"]
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z 127.0.0.1 4096"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - openchamber-net
+
+  # ─────────────────────────────────────────────
+  # OpenChamber - Web GUI for OpenCode
+  # Built locally from official source
+  # ─────────────────────────────────────────────
+  openchamber:
+    build: ./openchamber
+    container_name: openchamber
+    restart: unless-stopped
+    depends_on:
+      opencode:
+        condition: service_healthy
+    ports:
+      - "${OPENCHAMBER_PORT:-3000}:3000"
+    volumes:
+      - user-workspaces:/home/openchamber/workspaces
+      - openchamber-config:/home/openchamber/.config/openchamber
+      - opencode-data:/home/openchamber/.local/share/opencode
+      - opencode-config:/home/openchamber/.config/opencode
+    environment:
+      # ── Connect to external OpenCode server ──
+      - OPENCODE_HOST=http://opencode:4096
+      - OPENCODE_SKIP_START=true
+      - OPENCODE_SERVER_PASSWORD=${OPENCODE_SERVER_PASSWORD}
+      - OPENCODE_SERVER_USERNAME=${OPENCODE_SERVER_USERNAME:-opencode}
+      # ── OpenChamber Security ──
+      - OPENCHAMBER_UI_PASSWORD=${OPENCHAMBER_UI_PASSWORD}
+      - OPENCHAMBER_HOST=0.0.0.0
+      # ── Node ──
+      - NODE_ENV=production
+    networks:
+      - openchamber-net
+
+# ─────────────────────────────────────────────
+# Volumes - Persistent storage
+# ─────────────────────────────────────────────
+volumes:
+  user-workspaces:
+    driver: local
+    name: openchamber-user-workspaces
+  opencode-config:
+    driver: local
+    name: openchamber-opencode-config
+  opencode-data:
+    driver: local
+    name: openchamber-opencode-data
+  opencode-cache:
+    driver: local
+    name: openchamber-opencode-cache
+  openchamber-config:
+    driver: local
+    name: openchamber-openchamber-config
+
+# ─────────────────────────────────────────────
+# Network
+# ─────────────────────────────────────────────
+networks:
+  openchamber-net:
+    driver: bridge
+    name: openchamber-net
