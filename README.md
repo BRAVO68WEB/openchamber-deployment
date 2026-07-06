@@ -9,8 +9,7 @@ This Docker Compose setup runs a fully self-hosted AI coding environment:
 | Service | Image | Port | Description |
 |---------|-------|------|-------------|
 | 🔌 **OpenCode** | `ghcr.io/anomalyco/opencode` | `4096` (internal) | Headless AI coding agent API |
-| 🖥️ **OpenChamber** | Built locally from source | `3000` (internal) | Web GUI for OpenCode |
-| 🔀 **Nginx** | `nginx:alpine` | `80` (exposed) | Reverse proxy with WS/SSE support |
+| 🖥️ **OpenChamber** | Built locally from source | `3000` (exposed) | Web GUI for OpenCode |
 
 ## 🚀 Quick Start
 
@@ -41,9 +40,7 @@ OPENCODE_SERVER_USERNAME=opencode
 
 # 🔐 OpenChamber Web UI
 OPENCHAMBER_UI_PASSWORD=your-strong-password
-
-# 🌐 Nginx Reverse Proxy
-NGINX_PORT=80
+OPENCHAMBER_PORT=3000
 ```
 
 ### 3. Launch the stack
@@ -54,31 +51,29 @@ docker compose up -d --build
 
 ### 4. Access OpenChamber
 
-Open [http://localhost:80](http://localhost:80) (or your custom `NGINX_PORT`) in your browser and log in with your `OPENCHAMBER_UI_PASSWORD`.
-
-> **Note:** OpenChamber is not directly exposed to the host. All traffic goes through the Nginx reverse proxy, which properly handles WebSocket upgrades and SSE streaming.
+Open [http://localhost:3000](http://localhost:3000) in your browser and log in with your `OPENCHAMBER_UI_PASSWORD`.
 
 ## 🏗️ Architecture
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                     Docker Network                     │
-│                                                         │
-│  ┌───────────────┐  ┌────────────────┐  ┌────────────┐ │
-│  │   opencode    │  │  openchamber   │  │   nginx    │ │
-│  │ (headless API)│◄─│  (web GUI)     │◄─│ (reverse   │ │
-│  │   :4096       │  │   :3000        │  │  proxy)    │ │
-│  └───────────────┘  └────────────────┘  │   :80      │ │
-│          │                │              └─────┬──────┘ │
-│  ┌───────┴────────────────┴────────────────────┴──────┐ │
-│  │               Named Volumes                        │ │
-│  │  • user-workspaces    (code & projects)            │ │
-│  │  • opencode-config    (opencode.json)              │ │
-│  │  • opencode-data      (sessions, auth)             │ │
-│  │  • opencode-cache     (plugin cache)               │ │
-│  │  • openchamber-config (UI settings)                │ │
-│  └────────────────────────────────────────────────────┘ │
-└─────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────┐
+│                Docker Network                   │
+│                                                 │
+│  ┌───────────────────┐  ┌─────────────────────┐ │
+│  │   opencode        │  │   openchamber       │ │
+│  │   (headless API)  │◄─│   (web GUI)         │ │
+│  │   :4096           │  │   :3000             │ │
+│  └───────────────────┘  └─────────────────────┘ │
+│          │                        │             │
+│  ┌───────┴────────────────────────┴───────────┐ │
+│  │          Named Volumes                     │ │
+│  │  • user-workspaces   (code & projects)     │ │
+│  │  • opencode-config   (opencode.json)       │ │
+│  │  • opencode-data     (sessions, auth)      │ │
+│  │  • opencode-cache    (plugin cache)        │ │
+│  │  • openchamber-config (UI settings)        │ │
+│  └────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────┘
 ```
 
 ## 📦 What's Inside
@@ -96,14 +91,6 @@ Open [http://localhost:80](http://localhost:80) (or your custom `NGINX_PORT`) in
 - 🧩 [OhMyOpenCode](https://github.com/code-yeongyu/oh-my-openagent) — Plugin (installed on first boot)
 - 🔐 Passwordless `sudo` for the `openchamber` user
 - 🔑 SSH key auto-generation
-- 🔒 Internal only — not exposed to host, accessed via Nginx
-
-### Nginx Container
-- 🔀 [Nginx](https://nginx.org/) — Lightweight reverse proxy (`nginx:alpine`)
-- 📡 WebSocket proxying for `/api/event/ws`, `/api/global/event/ws`, `/api/terminal/ws`
-- 📺 SSE streaming with buffering disabled for live endpoints
-- 📁 `client_max_body_size 50M` for file uploads
-- ⏱️ `proxy_read_timeout 3600s` for long-lived connections
 
 ## 🔐 Security
 
@@ -111,7 +98,7 @@ Open [http://localhost:80](http://localhost:80) (or your custom `NGINX_PORT`) in
 |-------|-----------|
 | OpenCode API | HTTP Basic Auth (`OPENCODE_SERVER_PASSWORD`) |
 | OpenChamber UI | UI Password (`OPENCHAMBER_UI_PASSWORD`) |
-| Docker Network | Internal bridge network (ports 4096/3000 not exposed) |
+| Docker Network | Internal bridge network (port 4096 not exposed) |
 | Container User | Non-root `openchamber` user (UID 1000) with sudo |
 
 ## 🧩 OhMyOpenCode
@@ -207,7 +194,7 @@ docker exec -it openchamber ls ~/.config/openchamber/
 | `OPENCODE_SERVER_PASSWORD` | — | **Required.** HTTP basic auth password |
 | `OPENCODE_SERVER_USERNAME` | `opencode` | HTTP basic auth username |
 | `OPENCHAMBER_UI_PASSWORD` | — | **Required.** Web UI password |
-| `NGINX_PORT` | `80` | Host port for Nginx reverse proxy |
+| `OPENCHAMBER_PORT` | `3000` | Host port for OpenChamber |
 
 ## 🔧 Troubleshooting
 

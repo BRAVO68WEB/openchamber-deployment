@@ -64,7 +64,7 @@ services:
       # ── OpenChamber Security ──
       - OPENCHAMBER_UI_PASSWORD=${OPENCHAMBER_UI_PASSWORD}
       - OPENCHAMBER_HOST=0.0.0.0
-      - OPENCHAMBER_PUBLIC_ORIGIN=${OPENCHAMBER_PUBLIC_ORIGIN:-https://o.b68works.com}
+      - OPENCHAMBER_PUBLIC_ORIGIN=${OPENCHAMBER_PUBLIC_ORIGIN:-https://agent.my.doamin}
       # ── Node ──
       - NODE_ENV=production
     networks:
