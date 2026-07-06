@@ -42,9 +42,9 @@ MARKER="${HOME}/.local/.oh-my-openagent-installed"
 if [ ! -f "$MARKER" ]; then
     echo "[entrypoint] Installing oh-my-openagent..."
     if command -v bunx >/dev/null 2>&1; then
-        bunx oh-my-openagent install --no-interactive 2>&1 || true
+        bunx oh-my-openagent install 2>&1 || true
     elif command -v npx >/dev/null 2>&1; then
-        npx oh-my-openagent install --no-interactive 2>&1 || true
+        npx oh-my-openagent install 2>&1 || true
     else
         echo "[entrypoint] Warning: neither bunx nor npx found, skipping oh-my-openagent" >&2
     fi

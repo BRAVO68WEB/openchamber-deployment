@@ -48,8 +48,6 @@ services:
     depends_on:
       opencode:
         condition: service_healthy
-    ports:
-      - "${OPENCHAMBER_PORT:-3000}:3000"
     volumes:
       - user-workspaces:/home/openchamber/workspaces
       - openchamber-config:/home/openchamber/.config/openchamber
@@ -66,6 +64,22 @@ services:
       - OPENCHAMBER_HOST=0.0.0.0
       # ── Node ──
       - NODE_ENV=production
+    networks:
+      - openchamber-net
+
+  # ─────────────────────────────────────────────
+  # Nginx - Reverse proxy with WS/SSE support
+  # ─────────────────────────────────────────────
+  nginx:
+    image: nginx:alpine
+    container_name: nginx
+    restart: unless-stopped
+    depends_on:
+      - openchamber
+    ports:
+      - "${NGINX_PORT:-80}:80"
+    volumes:
+      - ./config/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
     networks:
       - openchamber-net
 
