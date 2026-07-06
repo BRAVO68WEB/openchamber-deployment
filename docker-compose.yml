@@ -71,15 +71,13 @@ services:
   # Nginx - Reverse proxy with WS/SSE support
   # ─────────────────────────────────────────────
   nginx:
-    image: nginx:alpine
+    build: ./nginx
     container_name: nginx
     restart: unless-stopped
     depends_on:
       - openchamber
     ports:
       - "${NGINX_PORT:-80}:80"
-    volumes:
-      - ./config/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
     networks:
       - openchamber-net
 
