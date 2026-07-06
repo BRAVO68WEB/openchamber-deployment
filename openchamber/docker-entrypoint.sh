@@ -13,6 +13,10 @@ fi
 OPENCODE_CONFIG_DIR="${OPENCODE_CONFIG_DIR:-${HOME}/.config/opencode}"
 export OPENCODE_CONFIG_DIR
 
+# ── Fix ownership of shared volumes (opencode runs as root) ──
+sudo chown -R openchamber:openchamber "${HOME}/.local/share/opencode" 2>/dev/null || true
+sudo chown -R openchamber:openchamber "${HOME}/.config/opencode" 2>/dev/null || true
+
 # ── SSH key generation ──
 SSH_DIR="${HOME}/.ssh"
 SSH_PRIVATE_KEY_PATH="${SSH_DIR}/id_ed25519"
