@@ -17,6 +17,13 @@ export OPENCODE_CONFIG_DIR
 sudo chown -R openchamber:openchamber "${HOME}/.local/share/opencode" 2>/dev/null || true
 sudo chown -R openchamber:openchamber "${HOME}/.config/opencode" 2>/dev/null || true
 
+# ── Ensure opencode.json has valid content ──
+OPENCODE_JSON="${HOME}/.config/opencode/opencode.json"
+if [ ! -s "$OPENCODE_JSON" ]; then
+    echo '{"$schema":"https://opencode.ai/config.json","plugin":["oh-my-openagent"]}' > "$OPENCODE_JSON"
+    echo "[entrypoint] Wrote default opencode.json"
+fi
+
 # ── SSH key generation ──
 SSH_DIR="${HOME}/.ssh"
 SSH_PRIVATE_KEY_PATH="${SSH_DIR}/id_ed25519"
