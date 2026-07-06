@@ -64,6 +64,26 @@ if [ -n "${OPENCHAMBER_UI_PASSWORD:-}" ]; then
     echo "[entrypoint] UI password set, enabling authentication"
 fi
 
+# ── Set publicOrigin for reverse proxy origin validation ──
+if [ -n "${OPENCHAMBER_PUBLIC_ORIGIN:-}" ]; then
+    SETTINGS_FILE="${HOME}/.config/openchamber/settings.json"
+    mkdir -p "$(dirname "$SETTINGS_FILE")"
+    if [ -f "$SETTINGS_FILE" ]; then
+        # Merge publicOrigin into existing settings
+        python3 -c "
+import json, sys
+with open('$SETTINGS_FILE') as f:
+    s = json.load(f) if f.read().strip() else {}
+s['publicOrigin'] = '$OPENCHAMBER_PUBLIC_ORIGIN'
+with open('$SETTINGS_FILE', 'w') as f:
+    json.dump(s, f, indent=2)
+" 2>/dev/null || echo '{"publicOrigin":"'"$OPENCHAMBER_PUBLIC_ORIGIN"'"}' > "$SETTINGS_FILE"
+    else
+        echo '{"publicOrigin":"'"$OPENCHAMBER_PUBLIC_ORIGIN"'"}' > "$SETTINGS_FILE"
+    fi
+    echo "[entrypoint] publicOrigin set to $OPENCHAMBER_PUBLIC_ORIGIN"
+fi
+
 # ── Start OpenChamber ──
 OPENCHAMBER_HOST="${OPENCHAMBER_HOST:-0.0.0.0}"
 export OPENCHAMBER_HOST
