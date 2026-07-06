@@ -9,12 +9,12 @@ services:
     stdin_open: true
     tty: true
     volumes:
-      - user-workspaces:/workspaces
+      - user-workspaces:/home/openchamber/workspaces
       - opencode-config:/root/.config/opencode
       - opencode-data:/root/.local/share/opencode
       - opencode-cache:/root/.cache/opencode
       - ./config/opencode.json:/root/.config/opencode/opencode.json:ro
-    working_dir: /workspaces
+    working_dir: /home/openchamber/workspaces
     environment:
       # ── Provider API Keys ──
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
