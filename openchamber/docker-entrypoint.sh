@@ -16,6 +16,7 @@ export OPENCODE_CONFIG_DIR
 # ── Fix ownership of shared volumes (opencode runs as root) ──
 sudo chown -R openchamber:openchamber "${HOME}/.local/share/opencode" 2>/dev/null || true
 sudo chown -R openchamber:openchamber "${HOME}/.config/opencode" 2>/dev/null || true
+sudo chown -R openchamber:openchamber "${HOME}/workspaces" 2>/dev/null || true
 
 # ── Ensure opencode.json has valid content ──
 OPENCODE_JSON="${HOME}/.config/opencode/opencode.json"
